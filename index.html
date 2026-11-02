@@ -24,7 +24,7 @@ nav a{color:var(--muted);text-decoration:none;font-size:.9rem;padding:6px 14px;b
 nav a:hover{color:var(--text);background:var(--card)}
 section{padding:90px 0 40px}
 .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding-top:80px}
-.avatar{width:128px;height:128px;border-radius:50%;display:grid;place-items:center;font-size:2.6rem;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 0 0 4px var(--bg),0 0 0 6px var(--a1),0 0 50px var(--glow);margin-bottom:22px;animation:float 5s ease-in-out infinite}
+.avatar{object-fit:cover;width:128px;height:128px;border-radius:50%;display:grid;place-items:center;font-size:2.6rem;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 0 0 4px var(--bg),0 0 0 6px var(--a1),0 0 50px var(--glow);margin-bottom:22px;animation:float 5s ease-in-out infinite}
 @keyframes float{50%{transform:translateY(-10px)}}
 h1{font-size:clamp(2.2rem,6vw,3.8rem);margin:0 0 8px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(90deg,var(--text),var(--a2) 60%,var(--a1));-webkit-background-clip:text;background-clip:text;color:transparent}
 .role{font-size:1.2rem;color:var(--muted);min-height:1.9em}
@@ -54,6 +54,8 @@ h2 span{color:var(--a1)}
 .stats .card b{display:block;font-size:2rem;background:linear-gradient(90deg,var(--a1),var(--a2));-webkit-background-clip:text;background-clip:text;color:transparent}
 .stats .card small{color:var(--muted)}
 .contact{text-align:center}
+.gh{display:grid;gap:18px}.gh img{display:block;max-width:100%;margin:0 auto;border-radius:8px}
+.card{transform-style:preserve-3d;will-change:transform}
 footer{text-align:center;color:var(--muted);font-size:.8rem;padding:40px 0 30px}
 .reveal{opacity:0;transform:translateY(30px);transition:opacity .8s,transform .8s}
 .reveal.in{opacity:1;transform:none}
@@ -62,11 +64,11 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:40px 0 30px}
 </head>
 <body>
 <canvas id="bg"></canvas>
-<nav><a href="#top">Home</a><a href="#about">About</a><a href="#projects">Projects</a><a href="#skills">Skills</a><a href="#contact">Contact</a></nav>
+<nav><a href="#top">Home</a><a href="#about">About</a><a href="#projects">Projects</a><a href="#skills">Skills</a><a href="#github">GitHub</a><a href="#contact">Contact</a></nav>
 
 <main id="top">
   <section class="hero">
-    <div class="avatar">MA</div>
+    <img class="avatar" src="Profile.jpg" alt="Mohammad Asadpour" onerror="this.outerHTML='<div class=&quot;avatar&quot;>MA</div>'">
     <h1>Mohammad Asadpour</h1>
     <div class="role">I build <b id="typed"></b><span class="cursor"></span></div>
     <p class="bio">Hi there! I’m a 20-year-old Computer Engineering student at the University of Tabriz. I love building robust server-side systems while exploring the evolving world of Artificial Intelligence.</p>
@@ -109,6 +111,14 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:40px 0 30px}
     </div>
   </section>
 
+  <section id="github" class="reveal">
+    <h2>My GitHub <span>journey</span></h2>
+    <div class="gh">
+      <div class="card"><img src="https://github-readme-streak-stats.herokuapp.com/?user=Mhmd-Asadpour-2006&theme=github-green-dark&hide_border=true" alt="GitHub Streak Stats"></div>
+      <div class="card"><img src="https://github-readme-activity-graph.vercel.app/graph?username=Mhmd-Asadpour-2006&theme=github-dark&area=true&hide_border=true&line=2ea44f&point=22863a" alt="Contribution Graph"></div>
+    </div>
+  </section>
+
   <section id="contact" class="reveal contact">
     <h2>Let’s <span>connect</span> &amp; collaborate!</h2>
     <p class="bio">Have an idea, a project or just want to say hi? My inbox is always open.</p>
@@ -133,6 +143,16 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:40px 0 30px}
   }
   tick();
 })();
+
+// 3D tilt on cards
+document.querySelectorAll(".card").forEach(function(c){
+  c.addEventListener("mousemove",function(e){
+    var r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+    c.style.transition="transform .08s";
+    c.style.transform="perspective(700px) rotateX("+(-y*14)+"deg) rotateY("+(x*14)+"deg) translateY(-6px) scale(1.02)";
+  });
+  c.addEventListener("mouseleave",function(){c.style.transition="transform .4s";c.style.transform=""});
+});
 
 // Reveal + counters
 var io=new IntersectionObserver(function(es){es.forEach(function(e){
@@ -189,6 +209,13 @@ document.querySelectorAll(".reveal").forEach(function(r){io.observe(r)});
     m.rotation.x=Math.PI/2+r[2]*.3;m.rotation.y=r[2]*.5;rings.add(m);
   });
   group.add(rings);
+  var disc=null;
+  new THREE.TextureLoader().load("Profile.jpg",function(tx){
+    disc=new THREE.Group();
+    disc.add(new THREE.Mesh(new THREE.CircleGeometry(1.15,64),new THREE.MeshBasicMaterial({map:tx,side:THREE.DoubleSide})));
+    disc.add(new THREE.Mesh(new THREE.RingGeometry(1.15,1.28,64),new THREE.MeshBasicMaterial({color:0x2ea44f,side:THREE.DoubleSide})));
+    group.add(disc);
+  },undefined,function(){});
   var oct=new THREE.Mesh(new THREE.OctahedronGeometry(1.1),new THREE.MeshBasicMaterial({color:0xf05032,wireframe:true,transparent:true,opacity:.5}));
   oct.position.set(-14,6,-6);scene.add(oct);
   var dod=new THREE.Mesh(new THREE.DodecahedronGeometry(1.4),new THREE.MeshBasicMaterial({color:0xffd43b,wireframe:true,transparent:true,opacity:.4}));
@@ -216,6 +243,7 @@ document.querySelectorAll(".reveal").forEach(function(r){io.observe(r)});
       oct.rotation.x=t*.5;oct.rotation.y=t*.4;oct.position.y=6+Math.sin(t)*1.2;
       dod.rotation.x=-t*.3;dod.rotation.z=t*.45;dod.position.y=-7+Math.cos(t*.8)*1.2;
     }
+    if(disc)disc.rotation.y=Math.sin(t*.6)*.7;
     ray.setFromCamera(m2,cam);
     var hit=ray.intersectObjects(lg.children)[0];
     lg.children.forEach(function(s,i){
