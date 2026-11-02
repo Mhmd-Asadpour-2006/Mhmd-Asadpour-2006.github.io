@@ -113,9 +113,17 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:40px 0 30px}
 
   <section id="github" class="reveal">
     <h2>My GitHub <span>journey</span></h2>
-    <div class="gh">
-      <div class="card"><img src="https://github-readme-streak-stats.herokuapp.com/?user=Mhmd-Asadpour-2006&theme=github-green-dark&hide_border=true" alt="GitHub Streak Stats"></div>
-      <div class="card"><img src="https://github-readme-activity-graph.vercel.app/graph?username=Mhmd-Asadpour-2006&theme=github-dark&area=true&hide_border=true&line=2ea44f&point=22863a" alt="Contribution Graph"></div>
+    <div class="stats">
+      <div class="card"><b id="g-repos">–</b><small>Public repos</small></div>
+      <div class="card"><b id="g-star">–</b><small>Stars earned</small></div>
+      <div class="card"><b id="g-fol">–</b><small>Followers</small></div>
+      <div class="card"><b id="g-ing">–</b><small>Following</small></div>
+    </div>
+    <p class="bio" style="margin:26px auto 12px">Languages across my repositories</p>
+    <div class="skills" id="g-langs"></div>
+    <div class="gh" style="margin-top:26px">
+      <div class="card"><img src="https://ghchart.rshah.org/2ea44f/Mhmd-Asadpour-2006" alt="Contribution chart" onerror="this.parentNode.style.display='none'"></div>
+      <div class="card"><img src="https://streak-stats.demolab.com?user=Mhmd-Asadpour-2006&theme=github-green-dark&hide_border=true" alt="GitHub streak" onerror="this.parentNode.style.display='none'"></div>
     </div>
   </section>
 
@@ -142,6 +150,24 @@ footer{text-align:center;color:var(--muted);font-size:.8rem;padding:40px 0 30px}
     setTimeout(tick,del?40:85);
   }
   tick();
+})();
+
+// Live GitHub stats via the public API
+(function(){
+  var u="Mhmd-Asadpour-2006";
+  function set(id,v){var e=document.getElementById(id);if(e)e.textContent=v}
+  fetch("https://api.github.com/users/"+u).then(function(r){return r.json()}).then(function(d){
+    set("g-repos",d.public_repos);set("g-fol",d.followers);set("g-ing",d.following);
+  }).catch(function(){});
+  fetch("https://api.github.com/users/"+u+"/repos?per_page=100").then(function(r){return r.json()}).then(function(rs){
+    var st=0,l={};
+    rs.forEach(function(r){st+=r.stargazers_count;if(r.language)l[r.language]=(l[r.language]||0)+1});
+    set("g-star",st);
+    var box=document.getElementById("g-langs");
+    Object.keys(l).sort(function(a,b){return l[b]-l[a]}).forEach(function(k){
+      var sp=document.createElement("span");sp.textContent=k+" · "+l[k];box.appendChild(sp);
+    });
+  }).catch(function(){});
 })();
 
 // 3D tilt on cards
@@ -209,13 +235,6 @@ document.querySelectorAll(".reveal").forEach(function(r){io.observe(r)});
     m.rotation.x=Math.PI/2+r[2]*.3;m.rotation.y=r[2]*.5;rings.add(m);
   });
   group.add(rings);
-  var disc=null;
-  new THREE.TextureLoader().load("Profile.jpg",function(tx){
-    disc=new THREE.Group();
-    disc.add(new THREE.Mesh(new THREE.CircleGeometry(1.15,64),new THREE.MeshBasicMaterial({map:tx,side:THREE.DoubleSide})));
-    disc.add(new THREE.Mesh(new THREE.RingGeometry(1.15,1.28,64),new THREE.MeshBasicMaterial({color:0x2ea44f,side:THREE.DoubleSide})));
-    group.add(disc);
-  },undefined,function(){});
   var oct=new THREE.Mesh(new THREE.OctahedronGeometry(1.1),new THREE.MeshBasicMaterial({color:0xf05032,wireframe:true,transparent:true,opacity:.5}));
   oct.position.set(-14,6,-6);scene.add(oct);
   var dod=new THREE.Mesh(new THREE.DodecahedronGeometry(1.4),new THREE.MeshBasicMaterial({color:0xffd43b,wireframe:true,transparent:true,opacity:.4}));
@@ -243,7 +262,6 @@ document.querySelectorAll(".reveal").forEach(function(r){io.observe(r)});
       oct.rotation.x=t*.5;oct.rotation.y=t*.4;oct.position.y=6+Math.sin(t)*1.2;
       dod.rotation.x=-t*.3;dod.rotation.z=t*.45;dod.position.y=-7+Math.cos(t*.8)*1.2;
     }
-    if(disc)disc.rotation.y=Math.sin(t*.6)*.7;
     ray.setFromCamera(m2,cam);
     var hit=ray.intersectObjects(lg.children)[0];
     lg.children.forEach(function(s,i){
